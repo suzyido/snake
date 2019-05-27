@@ -4,7 +4,7 @@ $(function() {
                        .setup('quintus', {maximize: true})
                        .controls();
 
-    Q.objectTypes = {
+    Q.objectType = {
         none: 0,
         snake: 1,
         tail: 2,
@@ -12,13 +12,39 @@ $(function() {
         display: 8
     };
 
+    Q.snakeFrame = {
+        left: 0,
+        down: 1,
+        right: 2,
+        up: 3,
+        standing: 16
+    };
+
+    Q.tailFrame = {
+        left: 4,
+        right: 5,
+        up: 6,
+        down: 7,
+        upRight: 8,
+        upLeft: 9,
+        downLeft: 10,
+        downRight: 11,
+        bottomTail: 12,
+        rightTail: 13,
+        topTail: 14,
+        leftTail: 15
+    }
+
+    Q.targetFrameStartAt = 17;
+    Q.targetFrameEndAt = 34;
+
     Q.Snake = Q.Sprite.extend({
         init: function(props) {
             this._super(_(props).extend({
                 sheet: 'snake',
                 sprite: 'snake',
-                type: Q.objectTypes.snake,
-                frame: 1,
+                type: Q.objectType.snake,
+                frame: Q.snakeFrame.standing,
                 speed: 150,
                 direction: null,
                 currentTarget: 1,
@@ -28,7 +54,7 @@ $(function() {
             }));
             
             this.add('tail');
-
+            
             _.bindAll(this, "_checkCollision", "_handleStep", "_adjustDirection", "_adjustLocation");
         },
 
@@ -44,21 +70,21 @@ $(function() {
             var p = this.p;
             var delta = dt * p.speed;
 
-            var hit = Q.stage().collide(this, Q.objectTypes.target | Q.objectTypes.tail);
+            var hit = Q.stage().collide(this, Q.objectType.target | Q.objectType.tail);
             if(hit) {
                 if((hit.p.type == 4 && hit.p.value == p.currentTarget)) {
                     p.currentTarget++;
                     hit.trigger('collision', this);
 
                     var stage = Q.stage();
-                    var obj = stage.item(Q.objectTypes.display);
+                    var obj = stage.item(Q.objectType.display);
                     if(obj) {
                         obj.trigger('collision', this);
                     }
 
                     this.tail.grow();
                 }
-                else if(hit.p.type == Q.objectTypes.tail && hit.p.following == this) {
+                else if(hit.p.type == Q.objectType.tail && hit.p.following == this) {
                     return;
                 }
                 else {
@@ -83,21 +109,26 @@ $(function() {
         _adjustDirection: function() {
             var p = this.p;
 
+            if(!p.hasTail) {
+                this.tail.grow();
+                p.hasTail = true;
+            }
+
             if(Q.inputs['right'] && p.direction != 'left') {
                 p.direction = 'right';
-                p.nextFrame = 2;
+                p.nextFrame = Q.snakeFrame.right;
             }
             else if(Q.inputs['left'] && p.direction != 'right') {
                 p.direction = 'left';
-                p.nextFrame = 0;
+                p.nextFrame = Q.snakeFrame.left;
             }
             else if(Q.inputs['up'] && p.direction != 'down') {
                 p.direction = 'up';
-                p.nextFrame = 3;
+                p.nextFrame = Q.snakeFrame.up;
             }
             else if(Q.inputs['down'] && p.direction != 'up') {
                 p.direction = 'down';
-                p.nextFrame = 1;
+                p.nextFrame = Q.snakeFrame.down;
             }                        
         },
         
@@ -158,8 +189,7 @@ $(function() {
             this._super(_(props).extend({
                 sheet: 'snake',
                 sprite: 'snake',
-                type: Q.objectTypes.tail,
-//                frame: 5,
+                type: Q.objectType.tail,
                 parts: 0,
                 z: 3
             }));
@@ -169,27 +199,47 @@ $(function() {
             var p = this.p;
             // Moving up
             if(p.x == p.lastFollowingLocX && 
-               (p.trailling == undefined || p.x == p.trailling.p.x) &&
+               (!p.trailling || p.x == p.trailling.p.x) &&
                p.y > p.lastFollowingLocY) {
-                p.frame = 6;
+                if(p.trailling) {
+                    p.frame = Q.tailFrame.up;                    
+                }
+                else {
+                    p.frame = Q.tailFrame.bottomTail;
+                }
             }
             // Moving down
             else if(p.x == p.lastFollowingLocX && 
-                    (p.trailling == undefined || p.x == p.trailling.p.x) &&
+                    (!p.trailling || p.x == p.trailling.p.x) &&
                     p.y < p.lastFollowingLocY) {
-                p.frame = 7;
+                if(p.trailling) {
+                    p.frame = Q.tailFrame.down;
+                }
+                else {
+                    p.frame = Q.tailFrame.topTail;
+                }
             }          
             // Moving right
             else if(p.y == p.lastFollowingLocY && 
-                    (p.trailling == undefined || p.y == p.trailling.p.y) &&
+                    (!p.trailling || p.y == p.trailling.p.y) &&
                     p.x < p.lastFollowingLocX) {
-                p.frame = 4;
+                if(p.trailling) {
+                    p.frame = Q.tailFrame.right;
+                }
+                else {
+                    p.frame = Q.tailFrame.leftTail;
+                }
             }          
             // Moving left
             else if(p.y == p.lastFollowingLocY && 
-                    (p.trailling == undefined || p.y == p.trailling.p.y) &&
+                    (!p.trailling || p.y == p.trailling.p.y) &&
                     p.x > p.lastFollowingLocX) {
-                    p.frame = 5;
+                if(p.trailling) {
+                    p.frame = Q.tailFrame.left;
+                }
+                else {
+                    p.frame = Q.tailFrame.rightTail;
+                }
             }          
             // Moving down or up turning left
             else if(p.y == p.lastFollowingLocY && 
@@ -197,11 +247,11 @@ $(function() {
                     (p.trailling == undefined || p.trailling && p.x == p.trailling.p.x)) {
                 // Moving down
                 if(p.y > p.trailling.p.y) {
-                    p.frame = 9;
+                    p.frame = Q.tailFrame.upLeft;
                 }
                 // Moving up
                 else {
-                    p.frame = 10;
+                    p.frame = Q.tailFrame.downLeft;
                 }
             }
             // Moving down or up turning right
@@ -210,10 +260,10 @@ $(function() {
                     p.trailling && p.x == p.trailling.p.x) {
                 // Moving down
                 if(p.y > p.trailling.p.y) {
-                    p.frame = 8;
+                    p.frame = Q.tailFrame.upRight;
                 }
                 else {
-                    p.frame = 11;
+                    p.frame = Q.tailFrame.downRight;
                 }
             }   
             // Moving left or right turning down
@@ -222,11 +272,11 @@ $(function() {
                 p.trailling && p.y == p.trailling.p.y) {
                 // Coming from left
                 if(p.x > p.trailling.p.x) {
-                    p.frame = 10;
+                    p.frame = Q.tailFrame.downLeft;
                 }
                 // Coming from right
                 else {
-                    p.frame = 11;
+                    p.frame = Q.tailFrame.downRight;
                 }
             }   
             // Moving left or right turning up
@@ -235,15 +285,12 @@ $(function() {
                 p.trailling && p.y == p.trailling.p.y) {
                 // Coming from left
                 if(p.x > p.trailling.p.x) {
-                    p.frame = 9;
+                    p.frame = Q.tailFrame.upLeft;
                 }
                 // Coming from right
                 else {
-                    p.frame = 8;
+                    p.frame = Q.tailFrame.upRight;
                 }
-            }
-            else {
-                p.frame = 0;
             }
          
             this._super(dt);
@@ -261,10 +308,12 @@ $(function() {
 
     Q.GameDisplay = Q.Sprite.extend({
        init: function(props) {
-            this._super(_(props).extend({3: 40, w: 50, h: 30, 
-                                         z: 10, type: Q.objectTypes.display,
-                                         nextItemToGrab: 1}));           
-            
+            this._super(_(props).extend({z: 2,
+                                         sheet: 'snake',
+                                         sprite: 'snake',
+                                         type: Q.objectType.display,
+                                         nextItemToGrab: 0}));
+   
             this.bind('collision', this, 'updateNextItemToGrab');
        },
         
@@ -277,9 +326,8 @@ $(function() {
             ctx.rect(p.x, p.y, p.w, p.h); 
             ctx.stroke();
 
-            ctx.fillStyle = "blue";
-            ctx.font = "20px Arial";
-            ctx.fillText(p.nextItemToGrab, p.x + p.w/2 - 10, p.y + p.h/2 + 10);
+            p.frame = p.startingFrame + p.nextItemToGrab;
+            this._super(ctx);
         },
 
         updateNextItemToGrab: function() {
@@ -290,17 +338,25 @@ $(function() {
 
     Q.Target = Q.Sprite.extend({
         init: function(props) {
-            x = Math.floor(Math.random() * Q.width);
-            y = Math.floor(Math.random() * Q.height);
+            var x, y;
+            do {
+                x = Math.floor(Math.random() * Q.width);
+                y = Math.floor(Math.random() * Q.height);
 
-            x = x - x % 40;
-            y = y - y % 40;
-            
-            this._super(_(props).extend({h: 40, w: 40, 
-                                         x: x, y: y, z: 2,
-                                         onScreen: false,
-                                         type: Q.objectTypes.target}));
+                x = x - x % 32;
+                y = y - y % 32;
+            }
+            while(!(x > 32 * 2 &&
+                    x < Q.width - 32 * 2 &&
+                    y > 32 * 2 &&
+                    y < Q.height - 32 * 2));
 
+            this._super(_(props).extend({x: x, y: y, z: 2,
+                                         sheet: 'snake',
+                                         sprite: 'snake',
+                                         type: Q.objectType.target
+                                        }));
+                            
             this.bind('collision', this, 'collision');
         },
 
@@ -310,18 +366,8 @@ $(function() {
             if(!p.onScreen) {
                 return;
             }
-
-            ctx.fillStyle = "#000";
-            
-            ctx.beginPath();
-            ctx.arc(p.x + p.w/2, p.y + p.h/2, p.w/2, 0, 2*Math.PI);
-            ctx.stroke();
-            ctx.fill();
-
-            ctx.fillStyle = "#FFF";
-            ctx.font = "20px Arial";
-            ctx.fillText(p.value, p.x + p.w/2 - 10, p.y + p.h/2 + 10);
-        },
+            this._super(ctx);
+        }, 
 
         step: function() {
             var p = this.p;
@@ -339,23 +385,35 @@ $(function() {
         },
 
         collision: function() {
+            var p = this.p;
+
+            if(p.value == Q.targetFrameEndAt - Q.targetFrameStartAt + 1) {
+                Q.stageScene("level");
+            }
             this.destroy();
         }
     });
 
     Q.scene('level', new Q.Scene(function(stage) {
-        stage.insert(new Q.GameDisplay({x: 10, y: 10}));
-        stage.insert(new Q.Snake({x: Q.width/2, y: Q.height/2}));
+        stage.insert(new Q.Repeater({asset: 'background-wall.png',
+                                     speedX: 0.50, y: -225, z:0}));
+        stage.insert(new Q.GameDisplay({x: 10, y: 10, 
+                                        startingFrame: Q.targetFrameStartAt}));
+        stage.insert(new Q.Snake({x: Q.width/2 - Q.width/2 % 32, 
+                                  y: Q.height/2 - Q.height/2 % 32}));
 
-        for(var i=1; i<= 20; i++) {
-            stage.insert(new Q.Target({value: i}));
+        var targetFrameRange = Q.targetFrameEndAt - Q.targetFrameStartAt + 1;
+        for(var i=Q.targetFrameStartAt; i<= Q.targetFrameEndAt; i++) {
+            stage.insert(new Q.Target({value: i - Q.targetFrameStartAt + 1, 
+                                       frame: i}));
         }
 
         stage.add('viewport');
-        stage.viewport.scale *= 0.8;
+        stage.viewport.scale *= 1.0;
     }, {sort: true}));
 
-    Q.load(['sprites.png', 'sprites.json', 'snake.png', 'snake.json'], function() {
+    Q.load(['background-wall.png','sprites.png', 
+            'sprites.json', 'snake.png', 'snake.json'], function() {
         Q.compileSheets('sprites.png','sprites.json');
         Q.compileSheets('snake.png','snake.json');
         Q.stageScene("level");
