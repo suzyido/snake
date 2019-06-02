@@ -12,10 +12,13 @@ Quintus.TailSection = function(Q) {
 
         step: function(dt) {
             var p = this.p;
+
+            this._super(dt);
+
             // Moving up
-            if(p.x == p.lastFollowingLocX && 
+            if(p.x == p.following.p.x && 
                (!p.trailling || p.x == p.trailling.p.x) &&
-               p.y > p.lastFollowingLocY) {
+               p.y > p.following.p.y) {
                 if(p.trailling) {
                     p.frame = Q.tailFrame.up;                    
                 }
@@ -24,9 +27,9 @@ Quintus.TailSection = function(Q) {
                 }
             }
             // Moving down
-            else if(p.x == p.lastFollowingLocX && 
+            else if(p.x == p.following.p.x && 
                     (!p.trailling || p.x == p.trailling.p.x) &&
-                    p.y < p.lastFollowingLocY) {
+                    p.y < p.following.p.y) {
                 if(p.trailling) {
                     p.frame = Q.tailFrame.down;
                 }
@@ -35,9 +38,9 @@ Quintus.TailSection = function(Q) {
                 }
             }          
             // Moving right
-            else if(p.y == p.lastFollowingLocY && 
+            else if(p.y == p.following.p.y && 
                     (!p.trailling || p.y == p.trailling.p.y) &&
-                    p.x < p.lastFollowingLocX) {
+                    p.x < p.following.p.x) {
                 if(p.trailling) {
                     p.frame = Q.tailFrame.right;
                 }
@@ -46,9 +49,9 @@ Quintus.TailSection = function(Q) {
                 }
             }          
             // Moving left
-            else if(p.y == p.lastFollowingLocY && 
+            else if(p.y == p.following.p.y && 
                     (!p.trailling || p.y == p.trailling.p.y) &&
-                    p.x > p.lastFollowingLocX) {
+                    p.x > p.following.p.x) {
                 if(p.trailling) {
                     p.frame = Q.tailFrame.left;
                 }
@@ -57,8 +60,8 @@ Quintus.TailSection = function(Q) {
                 }
             }          
             // Moving down or up turning left
-            else if(p.y == p.lastFollowingLocY && 
-                    p.x > p.lastFollowingLocX && 
+            else if(p.y == p.following.p.y && 
+                    p.x > p.following.p.x && 
                     (p.trailling == undefined || p.trailling && p.x == p.trailling.p.x)) {
                 // Moving down
                 if(p.y > p.trailling.p.y) {
@@ -70,8 +73,8 @@ Quintus.TailSection = function(Q) {
                 }
             }
             // Moving down or up turning right
-            else if(p.y == p.lastFollowingLocY && 
-                    p.x < p.lastFollowingLocX && 
+            else if(p.y == p.following.p.y && 
+                    p.x < p.following.p.x && 
                     p.trailling && p.x == p.trailling.p.x) {
                 // Moving down
                 if(p.y > p.trailling.p.y) {
@@ -82,8 +85,8 @@ Quintus.TailSection = function(Q) {
                 }
             }   
             // Moving left or right turning down
-            else if(p.x == p.lastFollowingLocX && 
-                p.y < p.lastFollowingLocY && 
+            else if(p.x == p.following.p.x && 
+                p.y < p.following.p.y && 
                 p.trailling && p.y == p.trailling.p.y) {
                 // Coming from left
                 if(p.x > p.trailling.p.x) {
@@ -95,8 +98,8 @@ Quintus.TailSection = function(Q) {
                 }
             }   
             // Moving left or right turning up
-            else if(p.x == p.lastFollowingLocX && 
-                p.y > p.lastFollowingLocY && 
+            else if(p.x == p.following.p.x && 
+                p.y > p.following.p.y && 
                 p.trailling && p.y == p.trailling.p.y) {
                 // Coming from left
                 if(p.x > p.trailling.p.x) {
@@ -106,9 +109,7 @@ Quintus.TailSection = function(Q) {
                 else {
                     p.frame = Q.tailFrame.upRight;
                 }
-            }
-         
-            this._super(dt);
+            }         
         },
 
         draw: function(ctx) {
@@ -116,6 +117,7 @@ Quintus.TailSection = function(Q) {
             
             if(p.frame) {
                 this._super(ctx);
+                p.frame = undefined;
             }
         }
     });

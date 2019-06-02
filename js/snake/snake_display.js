@@ -14,12 +14,25 @@ Quintus.Display = function(Q) {
         draw: function(ctx) {
                 var p = this.p;
 
-                ctx.fillStyle = "#FFFF00";
-                ctx.fillRect(2, 2, 150, 50);
+                ctx.beginPath();
+                ctx.lineWidth = "10";
+                ctx.strokeStyle = "red";
+                ctx.rect(10, 10, 240, 40);
+                ctx.stroke();
+
+                ctx.fillStyle = "#FFFFCA";
+                ctx.fillRect(12, 12, 236, 36);
+
+                ctx.lineWidth = "8";
+                ctx.beginPath();
+                ctx.moveTo(100, 12);
+                ctx.lineTo(100, 52);
+                ctx.stroke();
 
                 ctx.fillStyle = "#000000";
                 ctx.font = "20px Arial";
-                ctx.fillText("Next Bite: ", p.x - 90, p.y + 22);
+                var text = "Stage: " + p.stage + "   Next bite:"
+                ctx.fillText(text, p.x - 188, p.y + 23);
 
                 p.frame = p.startingFrame + p.nextItemToGrab;
                 this._super(ctx);

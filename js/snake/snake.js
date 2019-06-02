@@ -42,13 +42,13 @@ $(function() {
     Q.scene('level1', new Q.Scene(function(stage) {
         stage.insert(new Q.Repeater({asset: 'background-wall.png',
                                      speedX: 0.50, y: -225, z:0}));
-        stage.insert(new Q.GameDisplay({x: 100, y: 10, 
-                                        startingFrame: Q.targetFrameStartAt}));
+        stage.insert(new Q.GameDisplay({x: 204, y: 13, 
+                                        startingFrame: Q.targetFrameStartAt,
+                                        stage: 1}));
         stage.insert(new Q.SnakeHead({x: Q.width/2 - Q.width/2 % 32, 
                                   y: Q.height/2 - Q.height/2 % 32,
                                   speed: 150}));
 
-        var targetFrameRange = Q.targetFrameEndAt - Q.targetFrameStartAt + 1;
         for(var i=Q.targetFrameStartAt; i<= Q.targetFrameEndAt; i++) {
             stage.insert(new Q.Target({value: i - Q.targetFrameStartAt + 1, 
                                        frame: i}));
@@ -61,13 +61,13 @@ $(function() {
     Q.scene('level2', new Q.Scene(function(stage) {
         stage.insert(new Q.Repeater({asset: 'background-wall.png',
                                      speedX: 0.50, y: -225, z:0}));
-        stage.insert(new Q.GameDisplay({x: 100, y: 10, 
-                                        startingFrame: Q.targetFrameStartAt}));
+        stage.insert(new Q.GameDisplay({x: 204, y: 13, 
+                                        startingFrame: Q.targetFrameStartAt,
+                                        stage: 2}));
         stage.insert(new Q.SnakeHead({x: Q.width/2 - Q.width/2 % 32, 
                                   y: Q.height/2 - Q.height/2 % 32,
                                   speed: 250}));
 
-        var targetFrameRange = Q.targetFrameEndAt - Q.targetFrameStartAt + 1;
         for(var i=Q.targetFrameStartAt; i<= Q.targetFrameEndAt; i++) {
             stage.insert(new Q.Target({value: i - Q.targetFrameStartAt + 1, 
                                        frame: i}));
@@ -78,7 +78,7 @@ $(function() {
     }, {sort: true}));
 
     Q.load(['background-wall.png','sprites.png', 
-            'sprites.json', 'snake.png', 'snake.json'], function() {
+            'sprites.json', 'snake.png', 'snake.json', 'display.png'], function() {
         Q.compileSheets('sprites.png','sprites.json');
         Q.compileSheets('snake.png','snake.json');
         Q.stageScene("level1");
