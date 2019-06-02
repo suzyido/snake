@@ -14,30 +14,30 @@ $(function() {
     };
 
     Q.snakeFrame = {
-        left: 0,
-        down: 1,
-        right: 2,
-        up: 3,
-        standing: 16
+        left: 1,
+        down: 5,
+        right: 9,
+        up: 13,
+        standing: 28
     };
 
     Q.tailFrame = {
-        left: 4,
-        right: 5,
-        up: 6,
-        down: 7,
-        upRight: 8,
-        upLeft: 9,
-        downLeft: 10,
-        downRight: 11,
-        bottomTail: 12,
-        rightTail: 13,
-        topTail: 14,
-        leftTail: 15
+        left: 16,
+        right: 17,
+        up: 18,
+        down: 19,
+        upRight: 20,
+        upLeft: 21,
+        downLeft: 22,
+        downRight: 23,
+        bottomTail: 24,
+        rightTail: 25,
+        topTail: 26,
+        leftTail: 27
     }
 
-    Q.targetFrameStartAt = 17;
-    Q.targetFrameEndAt = 34;
+    Q.targetFrameStartAt = 29;
+    Q.targetFrameEndAt = 46;
 
     Q.scene('level1', new Q.Scene(function(stage) {
         stage.insert(new Q.Repeater({asset: 'background-wall.png',
@@ -81,6 +81,12 @@ $(function() {
             'sprites.json', 'snake.png', 'snake.json', 'display.png'], function() {
         Q.compileSheets('sprites.png','sprites.json');
         Q.compileSheets('snake.png','snake.json');
+        Q.animations('snake', {
+            move_left: {frames: _.range(0, 3), rate: 1/5},
+            move_down: {frames: _.range(4, 7), rate: 1/5},
+            move_right: {frames: _.range(8, 11), rate: 1/5},
+            move_up: {frames: _.range(12, 15), rate: 1/5},
+        });
         Q.stageScene("level1");
     })
 });

@@ -13,8 +13,7 @@ Quintus.SnakeHead = function(Q) {
                 z: 3
             }));
             
-            this.add('tail');
-            
+            this.add('tail, animation');
             _.bindAll(this, "_checkCollision", "_handleStep", "_adjustDirection", "_adjustLocation");
         },
 
@@ -24,6 +23,8 @@ Quintus.SnakeHead = function(Q) {
 
             this._checkCollision(dt);
             this._handleStep(dt);
+            
+            this._super(dt);
         },
 
         _checkCollision: function(dt) {
@@ -105,15 +106,19 @@ Quintus.SnakeHead = function(Q) {
             
             if(p.direction == 'right') {
                 p.x += p.w;
+                this.play('move_right');
             }
             else if(p.direction == 'left') {
                 p.x -= p.w;
+                this.play('move_left');
             }
             else if(p.direction == 'up') {
                 p.y -= p.h;
+                this.play('move_up');
             }
             else if(p.direction == 'down') {
                 p.y += p.h;
+                this.play('move_down');
             }          
 
             if(p.x > Q.width || p.x < 0 || p.y > Q.height || p.y < 0) {
